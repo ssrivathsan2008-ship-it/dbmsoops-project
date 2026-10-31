@@ -8,7 +8,7 @@ SkillBridge bridges the gap between students with diverse technical skills and s
 
 ---
 
-## Architecture & Tech Stack (Slide 7)
+## Architecture & Tech Stack 
 
 | Layer | Technologies |
 |---|---|
@@ -19,35 +19,35 @@ SkillBridge bridges the gap between students with diverse technical skills and s
 
 ---
 
-## Key Features (Slides 3, 4, 5, 10)
+## Key Features 
 
 1. **Student Profiles & Proficiency Levels**:
    - Technical and soft skills with category tagging (Technical, Soft Skill, Tool, Design).
    - Verifiable 1–5 proficiency levels (Novice to Expert).
    - Bio, campus department, preferred role, and portfolio link.
 
-2. **Project Role Postings (Slide 4 Step 2)**:
+2. **Project Role Postings **:
    - Project title, required role (e.g. *Backend Developer*), role type (*Developer*, *Designer*, *Researcher*, *Tester*).
    - Project category (*Mini Project*, *Hackathon*, *Research*, *Capstone*).
    - Comma-separated required tech stack (e.g. *Java, DBMS, SQL*).
 
-3. **Transparent Rule-Based Matching Engine (Slide 4 Step 3 & Slide 6)**:
+3. **Transparent Rule-Based Matching Engine **:
    - $\text{Basic Overlap Score} = \text{round}\left(100 \times \frac{\text{Matched Required Skills}}{\text{Total Required Skills}}\right)$.
    - *Example from Slide 6:* Java & MySQL matching 2 out of 3 requirements = **67%**.
    - Optional proficiency weighting factors in candidate skill levels (1–5 scale) for realistic rankings (e.g., Aarav 92%, Neha 87%, Rohan 76%).
    - Transparent fit explanation highlighting both matched and missing skill requirements.
 
-4. **1-Click Application & Atomic Team Roster Insertion (Slide 4 Step 4 & Slide 8)**:
+4. **1-Click Application & Atomic Team Roster Insertion **:
    - Students submit join requests with an optional motivation note.
    - Project leads review pending requests and candidate fit scores.
    - **Transaction Guarantee:** Approving a join request (`Status = APPROVED`) and inserting the user into `team_members` executes in **one atomic `@Transactional` method** to maintain referential consistency.
 
-5. **Milestone Tracking (Slide 10 Future Scope)**:
+5. **Milestone Tracking **:
    - Teams can define deliverables, track deadlines, and toggle completion.
 
 ---
 
-## Database Design & Relational Schema (Slide 8)
+## Database Design & Relational Schema 
 
 Normalized Relational Model with Primary Keys, Foreign Keys, Unique Constraints, and Check Constraints:
 
@@ -89,7 +89,7 @@ Then open your browser to: **http://localhost:8080**
 
 ---
 
-## Demo Accounts (Slide 4)
+## Demo Accounts 
 
 All pre-seeded demo accounts share the password: `password`
 
