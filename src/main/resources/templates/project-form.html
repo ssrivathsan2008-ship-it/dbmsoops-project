@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Post project role')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('post')}"></nav>
+
+<main class="py-4">
+  <div class="container container-medium">
+    <div class="sb-card">
+      
+      <div class="mb-4">
+        <h1 class="h3 fw-bold mb-1">Post a project role</h1>
+        <p class="text-muted small mb-0">
+          Specify the open position, required skills, and deliverables for your student project team.
+        </p>
+      </div>
+
+      <form th:action="@{/projects}" method="post">
+        
+        <!-- Title -->
+        <div class="mb-3">
+          <label for="projectTitle" class="form-label">Project title *</label>
+          <input id="projectTitle" name="title" class="form-control" 
+                 placeholder="e.g. SkillBridge Platform or Campus RideShare" required>
+        </div>
+
+        <!-- Role Needed & Role Type -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-7">
+            <label for="roleNeeded" class="form-label">Role title *</label>
+            <input id="roleNeeded" name="roleNeeded" class="form-control" 
+                   placeholder="e.g. Backend Developer" required>
+          </div>
+          <div class="col-md-5">
+            <label for="roleType" class="form-label">Role type</label>
+            <select id="roleType" name="roleType" class="form-select">
+              <option value="Developer" selected>Developer</option>
+              <option value="Designer">Designer</option>
+              <option value="Researcher">Researcher</option>
+              <option value="Tester">Tester / QA</option>
+              <option value="Product">Product / Lead</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Project Type -->
+        <div class="mb-3">
+          <label for="projectType" class="form-label">Project category</label>
+          <select id="projectType" name="projectType" class="form-select">
+            <option value="Mini Project" selected>Java + DBMS Mini Project</option>
+            <option value="Hackathon">Hackathon Project</option>
+            <option value="Research">Academic Research</option>
+            <option value="Course Project">Course / Capstone Project</option>
+          </select>
+        </div>
+
+        <!-- Required Skills -->
+        <div class="mb-3">
+          <label for="skillsInput" class="form-label">Required skills * (comma-separated)</label>
+          <input id="skillsInput" name="skills" class="form-control" 
+                 placeholder="e.g. Java, DBMS, SQL" required>
+          <div class="form-helper">
+            The matching engine compares these skills with student profiles.
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <label for="descriptionInput" class="form-label">Description &amp; deliverables</label>
+          <textarea id="descriptionInput" name="description" rows="4" class="form-control" 
+                    placeholder="Describe the problem, responsibilities, and expected technical deliverables..."></textarea>
+        </div>
+
+        <!-- Submit & Cancel Actions -->
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+          <a th:href="@{/projects}" class="btn btn-sb-secondary btn-sm-compact">Cancel</a>
+          <button class="btn btn-sb-primary" type="submit">
+            Post project role
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('dashboard')}"></nav>
+
+<main class="py-4">
+  <div class="container container-wide">
+
+    <!-- Plain Header (No Gradients) -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+      <div>
+        <h1 class="h2 fw-bold mb-1" th:text="'Welcome back, ' + ${user.name}">Welcome back!</h1>
+        <p class="text-muted mb-0">
+          <span th:text="${user.department ?: 'Department not set'}">Computer Science</span> &bull; 
+          <span th:text="${user.preferredRole ?: 'Student Developer'}">Developer</span>
+        </p>
+      </div>
+      <div class="d-flex gap-2">
+        <a th:href="@{/projects/new}" class="btn btn-sb-primary btn-sm-compact">
+          <i class="bi bi-plus-lg me-1"></i> Post role
+        </a>
+        <a th:href="@{/projects}" class="btn btn-sb-secondary btn-sm-compact">
+          Explore projects
+        </a>
+      </div>
+    </div>
+
+    <!-- Compact Neutral Stat Row -->
+    <div class="sb-card p-0 mb-4">
+      <div class="row g-0">
+        <div class="col-md-3 col-6 stat-item">
+          <div class="stat-number" th:text="${#lists.size(led)}">0</div>
+          <div class="stat-label">
+            <span th:text="${#lists.size(led) == 1 ? 'Project led' : 'Projects led'}">Projects led</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 stat-item">
+          <div class="stat-number" th:text="${#lists.size(teams)}">0</div>
+          <div class="stat-label">
+            <span th:text="${#lists.size(teams) == 1 ? 'Team joined' : 'Teams joined'}">Teams joined</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 stat-item">
+          <div class="stat-number" th:text="${#lists.size(myRequests)}">0</div>
+          <div class="stat-label">
+            <span th:text="${#lists.size(myRequests) == 1 ? 'Application' : 'Applications'}">Applications</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 stat-item">
+          <div class="stat-number" th:text="${#lists.size(user.skills)}">0</div>
+          <div class="stat-label">
+            <span th:text="${#lists.size(user.skills) == 1 ? 'Skill listed' : 'Skills listed'}">Skills listed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Completeness Notice if empty -->
+    <div th:if="${#lists.isEmpty(user.skills)}" class="sb-toast mb-4">
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge-status"><span class="status-dot dot-pending"></span></span>
+        <span class="small">Add your skills and proficiencies to receive personalized project recommendations.</span>
+      </div>
+      <a th:href="@{/profile}" class="btn btn-sb-secondary btn-sm-compact text-nowrap">Add skills</a>
+    </div>
+
+    <!-- Recommended Projects -->
+    <div class="sb-card mb-4" th:if="${!#lists.isEmpty(recommended)}">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h3 class="fw-bold mb-0">Recommended for you</h3>
+          <p class="text-caption mb-0">Projects matching your listed skills</p>
+        </div>
+        <a th:href="@{/projects}" class="btn btn-sb-tertiary btn-sm-compact">View all &rarr;</a>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6" th:each="r : ${recommended}">
+          <div class="p-3 bg-white rounded-3 border">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <div>
+                <a th:href="@{/projects/{id}(id=${r.project.id})}" class="fw-semibold text-dark text-decoration-none" th:text="${r.project.title}">Project</a>
+                <div class="text-caption" th:text="${r.project.roleNeeded}">Role</div>
+              </div>
+              <span class="badge-status">
+                <span class="status-dot dot-approved"></span>
+                <span th:text="${r.score} + '% match'">85% match</span>
+              </span>
+            </div>
+
+            <div class="d-flex flex-wrap gap-1 mt-2">
+              <span th:each="m : ${r.matched}" class="skill-chip skill-chip-match" th:text="${m}">Java</span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+              <span class="text-caption" th:text="'Led by ' + ${r.project.lead.name}">Lead</span>
+              <a th:href="@{/projects/{id}(id=${r.project.id})}" class="btn btn-sb-secondary btn-sm-compact">View role</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Three Columns: Led, Teams, Requests -->
+    <div class="row g-4">
+      
+      <!-- Projects I Lead -->
+      <div class="col-lg-4 col-md-6">
+        <div class="sb-card h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0">Projects you lead</h4>
+            <span class="text-caption" th:text="${#lists.size(led)}">0</span>
+          </div>
+
+          <div th:if="${#lists.isEmpty(led)}" class="empty-state">
+            <p>You haven't posted any project roles yet.</p>
+            <a th:href="@{/projects/new}" class="btn btn-sb-secondary btn-sm-compact">Post a role</a>
+          </div>
+
+          <div th:unless="${#lists.isEmpty(led)}" class="d-flex flex-column">
+            <div th:each="p, iterStat : ${led}" 
+                 class="py-3" 
+                 th:classappend="${!iterStat.last} ? 'border-bottom' : ''">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <a th:href="@{/projects/{id}(id=${p.id})}" class="fw-semibold text-dark text-decoration-none" th:text="${p.title}">Title</a>
+                  <div class="text-caption" th:text="${p.roleNeeded}">Role</div>
+                </div>
+                <span th:if="${pendingCounts[p.id] > 0}" class="badge-status">
+                  <span class="status-dot dot-pending"></span>
+                  <span th:text="${pendingCounts[p.id] == 1 ? '1 request' : pendingCounts[p.id] + ' requests'}">1 request</span>
+                </span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-2 text-caption">
+                <span th:with="count=${p.team != null ? #lists.size(p.team.members) : 1}"
+                      th:text="${count == 1 ? '1 member' : count + ' members'}">1 member</span>
+                <a th:href="@{/projects/{id}(id=${p.id})}" class="btn btn-sb-tertiary btn-sm-compact p-0">Manage &rarr;</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Your Teams -->
+      <div class="col-lg-4 col-md-6">
+        <div class="sb-card h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0">Your teams</h4>
+            <span class="text-caption" th:text="${#lists.size(teams)}">0</span>
+          </div>
+
+          <div th:if="${#lists.isEmpty(teams)}" class="empty-state">
+            <p>You are not currently part of any project teams.</p>
+            <a th:href="@{/projects}" class="btn btn-sb-secondary btn-sm-compact">Browse projects</a>
+          </div>
+
+          <div th:unless="${#lists.isEmpty(teams)}" class="d-flex flex-column">
+            <div th:each="t, iterStat : ${teams}" 
+                 class="py-3" 
+                 th:classappend="${!iterStat.last} ? 'border-bottom' : ''">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <a th:href="@{/projects/{id}(id=${t.project.id})}" class="fw-semibold text-dark text-decoration-none" th:text="${t.teamName}">Team name</a>
+                  <div class="text-caption" th:text="'Project: ' + ${t.project.title}">Project</div>
+                </div>
+                <span class="badge-status">
+                  <span class="status-dot dot-active"></span>
+                  <span>Active</span>
+                </span>
+              </div>
+              <div class="mt-2 text-caption"
+                   th:with="count=${#lists.size(t.members)}"
+                   th:text="${count == 1 ? '1 member' : count + ' members'}">
+                1 member
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Your Applications -->
+      <div class="col-lg-4 col-md-12">
+        <div class="sb-card h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0">Your applications</h4>
+            <span class="text-caption" th:text="${#lists.size(myRequests)}">0</span>
+          </div>
+
+          <div th:if="${#lists.isEmpty(myRequests)}" class="empty-state">
+            <p>You haven't applied to any project teams yet.</p>
+            <a th:href="@{/projects}" class="btn btn-sb-secondary btn-sm-compact">Find a team</a>
+          </div>
+
+          <div th:unless="${#lists.isEmpty(myRequests)}" class="d-flex flex-column">
+            <div th:each="r, iterStat : ${myRequests}" 
+                 class="py-3" 
+                 th:classappend="${!iterStat.last} ? 'border-bottom' : ''">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <a th:href="@{/projects/{id}(id=${r.project.id})}" class="fw-semibold text-dark text-decoration-none" th:text="${r.project.title}">Project</a>
+                  <div class="text-caption" th:text="${r.project.roleNeeded}">Role</div>
+                </div>
+                <span class="badge-status">
+                  <span class="status-dot" 
+                        th:classappend="${r.status.name() == 'APPROVED'} ? 'dot-approved' : (${r.status.name() == 'REJECTED'} ? 'dot-rejected' : 'dot-pending')"></span>
+                  <span th:text="${r.status.name() == 'APPROVED' ? 'Approved' : (r.status.name() == 'REJECTED' ? 'Declined' : 'Pending')}">Pending</span>
+                </span>
+              </div>
+              <div class="mt-2 text-caption" th:if="${r.appliedAt != null}">
+                Applied <span th:text="${#temporals.format(r.appliedAt, 'dd MMM yyyy')}">Date</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

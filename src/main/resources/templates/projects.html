@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Projects')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('projects')}"></nav>
+
+<main class="py-4">
+  <div class="container container-wide">
+
+    <!-- Header & Search -->
+    <div class="sb-card mb-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <div>
+          <h1 class="h3 fw-bold mb-1">Open project roles</h1>
+          <p class="text-muted small mb-0">Discover student teams seeking your technical or design skills</p>
+        </div>
+        <a th:href="@{/projects/new}" class="btn btn-sb-primary btn-sm-compact">
+          <i class="bi bi-plus-lg me-1"></i> Post project role
+        </a>
+      </div>
+
+      <form method="get" th:action="@{/projects}" class="row g-2 align-items-center">
+        <div class="col-md-5">
+          <input name="q" th:value="${q}" class="form-control"
+                 placeholder="Search by skill, title, or keywords (e.g. Java, DBMS)...">
+        </div>
+        <div class="col-md-3">
+          <select name="role" class="form-select">
+            <option value="" th:selected="${selectedRole == ''}">All role types</option>
+            <option value="Developer" th:selected="${selectedRole == 'Developer'}">Developer</option>
+            <option value="Designer" th:selected="${selectedRole == 'Designer'}">Designer</option>
+            <option value="Researcher" th:selected="${selectedRole == 'Researcher'}">Researcher</option>
+            <option value="Tester" th:selected="${selectedRole == 'Tester'}">Tester</option>
+            <option value="Product" th:selected="${selectedRole == 'Product'}">Product</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select name="sort" class="form-select">
+            <option value="match" th:selected="${sort == 'match'}">Best match first</option>
+            <option value="newest" th:selected="${sort == 'newest'}">Newest first</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-sb-secondary w-100">Apply filter</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Active Filter Notice -->
+    <div th:if="${(q != null && !q.isBlank()) || (selectedRole != null && !selectedRole.isBlank())}" 
+         class="d-flex align-items-center justify-content-between mb-3 px-1">
+      <div class="text-caption">
+        Filtering by: 
+        <strong th:if="${q != null && !q.isBlank()}" th:text="'“' + ${q} + '”'"></strong>
+        <span th:if="${selectedRole != null && !selectedRole.isBlank()}" th:text="'(' + ${selectedRole} + ')'"></span>
+      </div>
+      <a th:href="@{/projects}" class="text-caption text-decoration-underline">Clear all filters</a>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(projects)}" class="sb-card empty-state">
+      <p>No projects match your current search criteria.</p>
+      <a th:href="@{/projects}" class="btn btn-sb-secondary btn-sm-compact">Reset filters</a>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="row g-4" th:unless="${#lists.isEmpty(projects)}">
+      <div class="col-md-6" th:each="p : ${projects}">
+        <div class="sb-card h-100 d-flex flex-column sb-card-interactive">
+          
+          <!-- Top Row: Role, Category & Match -->
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge-status">
+                  <span class="status-dot dot-open"></span>
+                  <span th:text="${p.roleType}">Developer</span>
+                </span>
+                <span class="text-caption" th:text="${p.projectType}">Mini project</span>
+              </div>
+              <h2 class="h4 fw-bold mb-0">
+                <a th:href="@{/projects/{id}(id=${p.id})}" class="text-dark text-decoration-none" th:text="${p.title}">Project title</a>
+              </h2>
+            </div>
+
+            <!-- Slim Match Meter (Slide 6 Specification) -->
+            <div th:with="c=${scores[p.id]}" style="min-width: 110px;">
+              <div class="match-meter">
+                <div class="match-meter-bar">
+                  <div class="match-meter-fill" th:style="'width: ' + ${c.score} + '%;'"></div>
+                </div>
+                <span class="match-meter-number" th:text="${c.score} + '%'">67%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seeking Role & Lead Info -->
+          <p class="text-muted small mb-2">
+            Role: <strong class="text-dark" th:text="${p.roleNeeded}">Backend Developer</strong> &bull;
+            Led by <span th:text="${p.lead.name}">Lead Name</span>
+            <span th:if="${p.lead.department != null}" th:text="'(' + ${p.lead.department} + ')'"></span>
+          </p>
+
+          <!-- Description Snippet -->
+          <p class="text-muted small flex-grow-1 mb-3" th:text="${#strings.abbreviate(p.description, 140)}">
+            Project description...
+          </p>
+
+          <!-- Clickable Skill Chips (Step 4 UX requirement) -->
+          <div class="mb-3">
+            <div class="text-caption mb-1">Required skills:</div>
+            <div class="d-flex flex-wrap gap-1">
+              <a th:each="s : ${p.requiredSkills}" 
+                 th:href="@{/projects(q=${s.name})}"
+                 class="skill-chip" 
+                 title="Filter projects by this skill"
+                 th:text="${s.name}">
+                Java
+              </a>
+            </div>
+          </div>
+
+          <!-- Bottom Meta & Action -->
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+            <span class="text-caption"
+                  th:with="count=${p.team != null ? #lists.size(p.team.members) : 1}"
+                  th:text="${count == 1 ? '1 team member' : count + ' team members'}">
+              1 team member
+            </span>
+            <a th:href="@{/projects/{id}(id=${p.id})}" class="btn btn-sb-secondary btn-sm-compact">
+              View details &rarr;
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

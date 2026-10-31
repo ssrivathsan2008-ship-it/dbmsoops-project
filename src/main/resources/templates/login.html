@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Sign in')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('login')}"></nav>
+
+<main class="py-5">
+  <div class="container container-narrow">
+    
+    <div class="sb-card mb-4">
+      <div class="mb-4">
+        <h1 class="h3 fw-bold mb-1">Sign in to your SkillBridge account</h1>
+        <p class="text-muted small mb-0">Enter your credentials to access your campus dashboard</p>
+      </div>
+
+      <div th:if="${param.registered}" class="sb-toast sb-toast-success mb-3">
+        <div class="d-flex align-items-center gap-2 small">
+          <span class="badge-status"><span class="status-dot dot-approved"></span></span>
+          <span>Account created successfully. You can now sign in.</span>
+        </div>
+      </div>
+
+      <div th:if="${param.error}" class="sb-toast mb-3" style="border-left-color: #DC2626;">
+        <div class="d-flex align-items-center gap-2 small">
+          <span class="badge-status"><span class="status-dot dot-pending"></span></span>
+          <span>Invalid email address or password.</span>
+        </div>
+      </div>
+
+      <form th:action="@{/login}" method="post">
+        <div class="mb-3">
+          <label for="loginEmail" class="form-label">Campus email address</label>
+          <input id="loginEmail" name="username" type="email" class="form-control" 
+                 placeholder="name@skillbridge.edu" required autofocus>
+        </div>
+
+        <div class="mb-4">
+          <label for="loginPassword" class="form-label">Password</label>
+          <input id="loginPassword" name="password" type="password" class="form-control" 
+                 placeholder="••••••••" required>
+        </div>
+
+        <button class="btn btn-sb-primary w-100 mb-3" type="submit">
+          Sign in
+        </button>
+      </form>
+
+      <div class="text-caption text-center">
+        Don't have an account yet? <a th:href="@{/register}">Create a profile</a>
+      </div>
+    </div>
+
+    <!-- Demo Accounts Helper -->
+    <div class="sb-card p-3" style="background-color: var(--sb-border-subtle);">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-caption fw-semibold text-uppercase">Demo accounts</span>
+        <span class="text-caption">Password: <code>password</code></span>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <div class="d-flex justify-content-between align-items-center p-2 rounded bg-white border">
+          <div>
+            <div class="fw-semibold small">Priya Patel</div>
+            <div class="text-caption">Project lead &bull; priya@skillbridge.edu</div>
+          </div>
+          <button type="button" class="btn btn-sb-secondary btn-sm-compact" 
+                  onclick="fillLogin('priya@skillbridge.edu', 'password')">Use</button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center p-2 rounded bg-white border">
+          <div>
+            <div class="fw-semibold small">Aarav Sharma</div>
+            <div class="text-caption">Candidate (92% match) &bull; aarav@skillbridge.edu</div>
+          </div>
+          <button type="button" class="btn btn-sb-secondary btn-sm-compact" 
+                  onclick="fillLogin('aarav@skillbridge.edu', 'password')">Use</button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center p-2 rounded bg-white border">
+          <div>
+            <div class="fw-semibold small">Neha Gupta</div>
+            <div class="text-caption">Candidate (87% match) &bull; neha@skillbridge.edu</div>
+          </div>
+          <button type="button" class="btn btn-sb-secondary btn-sm-compact" 
+                  onclick="fillLogin('neha@skillbridge.edu', 'password')">Use</button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center p-2 rounded bg-white border">
+          <div>
+            <div class="fw-semibold small">Rohan Verma</div>
+            <div class="text-caption">Candidate (76% match) &bull; rohan@skillbridge.edu</div>
+          </div>
+          <button type="button" class="btn btn-sb-secondary btn-sm-compact" 
+                  onclick="fillLogin('rohan@skillbridge.edu', 'password')">Use</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function fillLogin(email, pwd) {
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = pwd;
+  }
+</script>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Create profile')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('register')}"></nav>
+
+<main class="py-5">
+  <div class="container container-narrow">
+    <div class="sb-card">
+      
+      <div class="mb-4">
+        <h1 class="h3 fw-bold mb-1">Create your profile</h1>
+        <p class="text-muted small mb-0">Join your campus network to find teammates and project opportunities</p>
+      </div>
+
+      <div th:if="${error}" class="sb-toast mb-3" style="border-left-color: #DC2626;">
+        <span class="small" th:text="${error}">Error message</span>
+      </div>
+
+      <form th:action="@{/register}" method="post">
+        
+        <div class="mb-3">
+          <label for="regName" class="form-label">Full name *</label>
+          <input id="regName" name="name" class="form-control" placeholder="e.g. Aarav Sharma" required>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-7">
+            <label for="regEmail" class="form-label">Campus email address *</label>
+            <input id="regEmail" name="email" type="email" class="form-control" 
+                   placeholder="name@college.edu" required>
+          </div>
+          <div class="col-md-5">
+            <label for="regDept" class="form-label">Department</label>
+            <input id="regDept" name="department" class="form-control" placeholder="e.g. Computer Science">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="regRole" class="form-label">Preferred role or specialization</label>
+          <select id="regRole" name="preferredRole" class="form-select">
+            <option value="Backend Developer" selected>Backend Developer</option>
+            <option value="Frontend Developer">Frontend Developer</option>
+            <option value="Fullstack Developer">Fullstack Developer</option>
+            <option value="UI/UX Designer">UI/UX Designer</option>
+            <option value="Data Scientist / ML Engineer">Data Scientist / ML Engineer</option>
+            <option value="Research Assistant">Research Assistant</option>
+            <option value="Project Lead">Project Lead</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="regBio" class="form-label">Bio &amp; interests</label>
+          <textarea id="regBio" name="bio" rows="2" class="form-control" 
+                    placeholder="Briefly describe what technologies or project types interest you..."></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label for="regPassword" class="form-label">Password * (minimum 6 characters)</label>
+          <input id="regPassword" name="password" type="password" minlength="6" class="form-control" 
+                 placeholder="••••••••" required>
+        </div>
+
+        <button class="btn btn-sb-primary w-100 mb-3" type="submit">
+          Create profile
+        </button>
+
+      </form>
+
+      <div class="text-caption text-center">
+        Already have an account? <a th:href="@{/login}">Sign in here</a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

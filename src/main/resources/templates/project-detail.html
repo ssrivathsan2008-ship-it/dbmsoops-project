@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head(${project.title})}"></head>
+
+<body>
+  <nav th:replace="~{fragments :: nav('projects')}"></nav>
+
+  <main class="py-4">
+    <div class="container container-wide">
+
+      <!-- Toast Confirmation (Step 4 UX) -->
+      <div th:if="${param.applied}" class="sb-toast sb-toast-success">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge-status"><span class="status-dot dot-approved"></span></span>
+          <span>Your join request has been submitted to the project lead.</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+          onclick="this.parentElement.remove()"></button>
+      </div>
+
+      <div class="row g-4">
+
+        <!-- Left Column: Project Overview, Application & Team -->
+        <div class="col-lg-7">
+
+          <!-- Main Project Card -->
+          <div class="sb-card mb-4">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge-status">
+                  <span class="status-dot dot-open"></span>
+                  <span th:text="${project.status}">Open</span>
+                </span>
+                <span class="text-caption" th:text="${project.projectType}">Mini project</span>
+                <span class="text-caption" th:text="${project.roleType}">Developer</span>
+              </div>
+              <span class="text-caption"
+                th:text="'Posted ' + ${#temporals.format(project.createdAt, 'dd MMM yyyy')}">Date</span>
+            </div>
+
+            <h1 class="h2 fw-bold mb-1" th:text="${project.title}">Project title</h1>
+            <p class="text-muted mb-3">
+              Open role: <strong class="text-dark" th:text="${project.roleNeeded}">Backend Developer</strong>
+            </p>
+
+            <!-- Project Lead Row -->
+            <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-3"
+              style="background-color: var(--sb-border-subtle);">
+              <div class="avatar-initials" th:text="${project.lead.initials}">PL</div>
+              <div>
+                <div class="fw-semibold" th:text="${project.lead.name}">Lead Name</div>
+                <div class="text-caption">
+                  Project lead &bull; <span th:text="${project.lead.department ?: 'Campus'}">Department</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-caption mb-1">Role description &amp; objectives</div>
+              <p class="text-muted small mb-0" style="white-space: pre-line;" th:text="${project.description}">
+                Description...
+              </p>
+            </div>
+
+            <div>
+              <div class="text-caption mb-1">Required skills</div>
+              <div class="d-flex flex-wrap gap-1">
+                <a th:each="s : ${project.requiredSkills}" th:href="@{/projects(q=${s.name})}" class="skill-chip"
+                  th:text="${s.name}">
+                  Java
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Applicant Match Fit Card -->
+          <div th:unless="${isLead}" class="sb-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="fw-bold mb-0">Your skill fit</h3>
+              <span class="badge-status">
+                <span class="status-dot dot-approved"></span>
+                <span th:text="${myScore.score} + '% match'">67% match</span>
+              </span>
+            </div>
+
+            <!-- Match Meter Bar -->
+            <div class="match-meter mb-2">
+              <div class="match-meter-bar">
+                <div class="match-meter-fill" th:style="'width: ' + ${myScore.score} + '%;'"></div>
+              </div>
+            </div>
+            <p class="text-caption mb-3" th:text="${myScore.explanation}">2 skills matched</p>
+
+            <!-- Matched vs Missing Chips -->
+            <div class="row g-2 pt-2 border-top mb-3">
+              <div class="col-6">
+                <div class="text-caption mb-1">Matched skills:</div>
+                <div th:if="${#lists.isEmpty(myScore.matched)}" class="text-caption">None yet</div>
+                <div class="d-flex flex-wrap gap-1">
+                  <span th:each="m : ${myScore.matched}" class="skill-chip skill-chip-match" th:text="${m}">Java</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-caption mb-1">Missing requirements:</div>
+                <div th:if="${#lists.isEmpty(myScore.missing)}" class="text-caption text-success">All requirements
+                  matched</div>
+                <div class="d-flex flex-wrap gap-1">
+                  <span th:each="mis : ${myScore.missing}" class="skill-chip text-muted" th:text="${mis}">JDBC</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Application Actions -->
+            <div class="pt-3 border-top">
+              <!-- Case 1: Member -->
+              <div th:if="${isMember}" class="d-flex align-items-center gap-2">
+                <span class="badge-status">
+                  <span class="status-dot dot-approved"></span>
+                  <span>You are an active team member</span>
+                </span>
+              </div>
+
+              <!-- Case 2: Applied -->
+              <div th:if="${!isMember and applied}">
+                <div th:if="${myRequest.status.name() == 'PENDING'}" class="d-flex align-items-center gap-2">
+                  <span class="badge-status">
+                    <span class="status-dot dot-pending"></span>
+                    <span>Application pending &bull; Under review by project lead</span>
+                  </span>
+                </div>
+                <div th:if="${myRequest.status.name() == 'REJECTED'}" class="d-flex align-items-center gap-2">
+                  <span class="badge-status">
+                    <span class="status-dot dot-rejected"></span>
+                    <span>Application was declined</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Case 3: Apply Form -->
+              <form th:if="${!isMember and !applied}" th:action="@{/projects/{id}/apply(id=${project.id})}"
+                method="post" onsubmit="return confirm('Submit your application to join this project team?');">
+                <div class="mb-3">
+                  <label for="applyMessage" class="form-label">Note for project lead (optional)</label>
+                  <textarea id="applyMessage" name="message" rows="2" class="form-control"
+                    placeholder="Briefly state your interest, relevant coursework, or hackathon experience..."></textarea>
+                </div>
+                <button class="btn btn-sb-primary w-100" type="submit">
+                  Apply to join team
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Team Members Card -->
+          <div class="sb-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="fw-bold mb-0">Team roster</h3>
+              <span class="text-caption" th:with="count=${#lists.size(project.team.members)}"
+                th:text="${count == 1 ? '1 member' : count + ' members'}">
+                1 member
+              </span>
+            </div>
+
+            <div class="d-flex flex-column">
+              <div th:each="m, iterStat : ${project.team.members}"
+                class="d-flex justify-content-between align-items-center py-2"
+                th:classappend="${!iterStat.last} ? 'border-bottom' : ''">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="avatar-initials" th:text="${m.initials}">M</div>
+                  <div>
+                    <div class="fw-semibold" th:text="${m.name}">Member name</div>
+                    <div class="text-caption" th:text="${m.department ?: 'Campus'}">Dept</div>
+                  </div>
+                </div>
+                <span class="badge-status">
+                  <span class="status-dot"
+                    th:classappend="${m.id == project.lead.id} ? 'dot-open' : 'dot-approved'"></span>
+                  <span th:text="${m.id == project.lead.id ? 'Lead' : 'Member'}">Role</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Milestones Section (Slide 10 Roadmap) -->
+          <div class="sb-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h3 class="fw-bold mb-0">Project milestones</h3>
+                <p class="text-caption mb-0">Deliverables and key deadlines</p>
+              </div>
+              <button th:if="${isLead}" class="btn btn-sb-secondary btn-sm-compact" type="button"
+                data-bs-toggle="collapse" data-bs-target="#newMilestoneForm">
+                + Add milestone
+              </button>
+            </div>
+
+            <!-- Add Milestone Form -->
+            <div th:if="${isLead}" class="collapse mb-3" id="newMilestoneForm">
+              <form th:action="@{/projects/{id}/milestones(id=${project.id})}" method="post"
+                class="p-3 rounded-3 border" style="background-color: var(--sb-border-subtle);">
+                <div class="mb-2">
+                  <label for="milestoneTitle" class="form-label">Milestone title</label>
+                  <input id="milestoneTitle" name="title" class="form-control"
+                    placeholder="e.g. Complete schema DDL &amp; API routes" required>
+                </div>
+                <div class="row g-2 mb-2">
+                  <div class="col-md-7">
+                    <label for="milestoneDueDate" class="form-label">Target date</label>
+                    <input id="milestoneDueDate" name="dueDateStr" type="date" class="form-control">
+                  </div>
+                  <div class="col-md-5 d-flex align-items-end">
+                    <button class="btn btn-sb-primary w-100" type="submit">Save milestone</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div th:if="${#lists.isEmpty(milestones)}" class="empty-state py-3">
+              <p class="mb-0">No milestones posted yet.</p>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(milestones)}" class="d-flex flex-column">
+              <div th:each="ms, iterStat : ${milestones}" class="d-flex justify-content-between align-items-center py-2"
+                th:classappend="${!iterStat.last} ? 'border-bottom' : ''">
+                <div>
+                  <span th:classappend="${ms.completed} ? 'text-decoration-line-through text-muted' : 'fw-medium'"
+                    th:text="${ms.title}">Milestone</span>
+                  <span th:if="${ms.dueDate != null}" class="text-caption ms-2"
+                    th:text="'(Due ' + ${#temporals.format(ms.dueDate, 'dd MMM')} + ')'">Date</span>
+                </div>
+                <form th:if="${isLead}" th:action="@{/milestones/{id}/toggle(id=${ms.id})}" method="post" class="m-0">
+                  <button class="btn btn-sb-secondary btn-sm-compact" type="submit"
+                    th:title="${ms.completed} ? 'Mark incomplete' : 'Mark complete'">
+                    <i th:class="${ms.completed} ? 'bi bi-check2-circle text-success' : 'bi bi-circle'"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Lead Controls (Join Requests & Candidates) -->
+        <div class="col-lg-5" th:if="${isLead}">
+
+          <!-- Join Requests Management -->
+          <div class="sb-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h3 class="fw-bold mb-0">Join requests</h3>
+                <p class="text-caption mb-0">Review student applications</p>
+              </div>
+              <span class="text-caption" th:with="count=${#lists.size(requests)}"
+                th:text="${count == 1 ? '1 application' : count + ' applications'}">
+                0 applications
+              </span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(requests)}" class="empty-state py-3">
+              <p class="mb-0">No join requests received yet.</p>
+            </div>
+
+            <div class="d-flex flex-column gap-3" th:unless="${#lists.isEmpty(requests)}">
+              <div th:each="r : ${requests}" class="p-3 rounded-3 border bg-white">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="avatar-initials" th:text="${r.user.initials}">U</div>
+                    <div>
+                      <div class="fw-semibold" th:text="${r.user.name}">Applicant</div>
+                      <div class="text-caption" th:text="${r.user.department ?: 'Campus'}">Dept</div>
+                    </div>
+                  </div>
+                  <span class="badge-status">
+                    <span class="status-dot"
+                      th:classappend="${r.status.name() == 'APPROVED'} ? 'dot-approved' : (${r.status.name() == 'REJECTED'} ? 'dot-rejected' : 'dot-pending')"></span>
+                    <span
+                      th:text="${r.status.name() == 'APPROVED' ? 'Approved' : (r.status.name() == 'REJECTED' ? 'Declined' : 'Pending')}">Status</span>
+                  </span>
+                </div>
+
+                <div th:if="${r.matchScore != null}" class="d-flex align-items-center gap-2 mb-2">
+                  <span class="text-caption">Match score:</span>
+                  <span class="fw-semibold small" style="color: var(--sb-accent);"
+                    th:text="${r.matchScore} + '%'">85%</span>
+                </div>
+
+                <p th:if="${r.message != null && !r.message.isBlank()}" class="small text-muted p-2 rounded mb-2"
+                  style="background-color: var(--sb-border-subtle);" th:text="'“' + ${r.message} + '”'">
+                  Note...
+                </p>
+
+                <!-- In-line Approve/Reject Actions (Step 4 UX requirement) -->
+                <div th:if="${r.status.name() == 'PENDING'}" class="d-flex gap-2 mt-2 pt-2 border-top">
+                  <form th:action="@{/requests/{id}/approve(id=${r.id})}" method="post" class="flex-grow-1 m-0"
+                    onsubmit="return confirm('Approve applicant and add them to the team?');">
+                    <button class="btn btn-sb-primary btn-sm-compact w-100" type="submit">
+                      Approve
+                    </button>
+                  </form>
+                  <form th:action="@{/requests/{id}/reject(id=${r.id})}" method="post" class="flex-grow-1 m-0"
+                    onsubmit="return confirm('Decline this join request?');">
+                    <button class="btn btn-sb-secondary btn-sm-compact w-100" type="submit">
+                      Decline
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Matching Candidates Engine -->
+          <div class="sb-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h3 class="fw-bold mb-0">Matching candidates</h3>
+                <p class="text-caption mb-0">Ranked by rule-based skill fit</p>
+              </div>
+              <span class="text-caption" th:with="count=${#lists.size(candidates)}"
+                th:text="${count == 1 ? '1 candidate' : count + ' candidates'}">
+                0 candidates
+              </span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(candidates)}" class="empty-state py-3">
+              <p class="mb-0">No registered students found on campus.</p>
+            </div>
+
+            <div class="d-flex flex-column gap-2" th:unless="${#lists.isEmpty(candidates)}">
+              <div th:each="c : ${candidates}" class="p-3 rounded-3 border bg-white">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="avatar-initials" th:text="${c.user.initials}">AS</div>
+                    <div>
+                      <div class="fw-semibold" th:text="${c.user.name}">Candidate Name</div>
+                      <div class="text-caption">
+                        <span th:text="${c.user.department ?: 'Campus'}">Dept</span> &bull;
+                        <span th:text="${c.user.preferredRole ?: 'Student'}">Role</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="min-width: 90px;">
+                    <div class="match-meter">
+                      <div class="match-meter-bar">
+                        <div class="match-meter-fill" th:style="'width: ' + ${c.score} + '%;'"></div>
+                      </div>
+                      <span class="match-meter-number" th:text="${c.score} + '%'">92%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Matched Skills -->
+                <div class="d-flex flex-wrap gap-1 mt-2">
+                  <span th:each="sm : ${c.matched}" class="skill-chip skill-chip-match" th:text="${sm}">Java</span>
+                  <span th:each="smis : ${c.missing}" class="skill-chip text-muted" th:text="${smis}">SQL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column for Non-Leads -->
+        <div class="col-lg-5" th:unless="${isLead}">
+          <div class="sb-card" style="background-color: var(--sb-border-subtle);">
+            <h4 class="fw-bold mb-2">How matching works</h4>
+            <p class="text-muted small mb-3">
+              SkillBridge calculates your match percentage directly from the overlap between your listed profile skills
+              and the project's requirements.
+            </p>
+            <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
+              <li class="d-flex align-items-start gap-2">
+                <span class="badge-status"><span class="status-dot dot-approved"></span></span>
+                <span>Requests are sent directly to the project lead for review.</span>
+              </li>
+              <li class="d-flex align-items-start gap-2">
+                <span class="badge-status"><span class="status-dot dot-approved"></span></span>
+                <span>Upon approval, your membership is committed in an atomic database transaction.</span>
+              </li>
+              <li class="d-flex align-items-start gap-2">
+                <span class="badge-status"><span class="status-dot dot-approved"></span></span>
+                <span>Add skills on your <a th:href="@{/profile}">profile</a> to increase your match percentage.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+
+</html>

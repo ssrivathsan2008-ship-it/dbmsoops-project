@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Profile')}"></head>
+
+<body>
+  <nav th:replace="~{fragments :: nav('profile')}"></nav>
+
+  <main class="py-4">
+    <div class="container container-medium">
+
+      <!-- Toast Confirmation -->
+      <div th:if="${param.updated}" class="sb-toast sb-toast-success">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge-status"><span class="status-dot dot-approved"></span></span>
+          <span>Your profile details have been saved.</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+          onclick="this.parentElement.remove()"></button>
+      </div>
+
+      <!-- User Header Card -->
+      <div class="sb-card mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="avatar-initials avatar-initials-lg" th:text="${user.initials}">AS</div>
+            <div>
+              <h1 class="h3 fw-bold mb-0" th:text="${user.name}">Student Name</h1>
+              <div class="text-caption">
+                <span th:text="${user.email}">email@skillbridge.edu</span> &bull;
+                <span th:text="${user.department ?: 'Department not set'}">Department</span>
+              </div>
+              <div class="d-flex align-items-center gap-2 mt-1">
+                <span class="badge-status">
+                  <span class="status-dot dot-open"></span>
+                  <span th:text="${user.preferredRole ?: 'Student Developer'}">Role</span>
+                </span>
+                <span class="text-caption" th:with="count=${#lists.size(user.skills)}"
+                  th:text="${count == 1 ? '1 skill listed' : count + ' skills listed'}">
+                  0 skills
+                </span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <button class="btn btn-sb-secondary btn-sm-compact" type="button" data-bs-toggle="collapse"
+              data-bs-target="#editProfileForm">
+              Edit profile
+            </button>
+          </div>
+        </div>
+
+        <!-- Bio / Links -->
+        <div class="mt-3 pt-3 border-top" th:if="${user.bio != null && !user.bio.isBlank()}">
+          <p class="text-muted small mb-0" th:text="${user.bio}"></p>
+        </div>
+        <div class="mt-2 text-caption" th:if="${user.portfolioUrl != null && !user.portfolioUrl.isBlank()}">
+          <i class="bi bi-link-45deg me-1"></i>
+          <a th:href="${user.portfolioUrl}" target="_blank" rel="noopener noreferrer"
+            th:text="${user.portfolioUrl}"></a>
+        </div>
+
+        <!-- Collapsible Profile Edit Form -->
+        <div class="collapse mt-3 pt-3 border-top" id="editProfileForm">
+          <h4 class="fw-bold mb-3">Edit profile details</h4>
+          <form th:action="@{/profile}" method="post">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="editName" class="form-label">Full name</label>
+                <input id="editName" name="name" class="form-control" th:value="${user.name}" required>
+              </div>
+              <div class="col-md-6">
+                <label for="editDept" class="form-label">Department</label>
+                <input id="editDept" name="department" class="form-control" th:value="${user.department}">
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="editRole" class="form-label">Preferred role</label>
+                <input id="editRole" name="preferredRole" class="form-control" th:value="${user.preferredRole}">
+              </div>
+              <div class="col-md-6">
+                <label for="editPortfolio" class="form-label">Portfolio or GitHub URL</label>
+                <input id="editPortfolio" name="portfolioUrl" class="form-control" th:value="${user.portfolioUrl}"
+                  placeholder="https://github.com/username">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="editBio" class="form-label">About &amp; interests</label>
+              <textarea id="editBio" name="bio" rows="2" class="form-control" th:text="${user.bio}"></textarea>
+            </div>
+            <button class="btn btn-sb-primary btn-sm-compact" type="submit">Save changes</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Add / Update Skill Form -->
+      <div class="sb-card mb-4">
+        <div class="mb-3">
+          <h3 class="fw-bold mb-1">Add or update skill</h3>
+          <p class="text-caption mb-0">List technical frameworks, databases, or soft skills with your proficiency level
+          </p>
+        </div>
+
+        <form th:action="@{/profile/skills}" method="post" class="row g-2 align-items-end">
+          <div class="col-md-5">
+            <label for="skillName" class="form-label">Skill name</label>
+            <input id="skillName" name="skill" class="form-control" placeholder="e.g. Java, DBMS, Figma" required>
+          </div>
+          <div class="col-md-3">
+            <label for="skillCategory" class="form-label">Category</label>
+            <select id="skillCategory" name="category" class="form-select">
+              <option value="Technical" selected>Technical</option>
+              <option value="Soft Skill">Soft skill</option>
+              <option value="Tool">Tool / DevOps</option>
+              <option value="Design">Design / UI</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="skillProficiency" class="form-label">Proficiency</label>
+            <select id="skillProficiency" name="proficiency" class="form-select">
+              <option value="1">1 - Novice</option>
+              <option value="2">2 - Basic</option>
+              <option value="3" selected>3 - Intermediate</option>
+              <option value="4">4 - Advanced</option>
+              <option value="5">5 - Expert</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-sb-primary w-100" type="submit">Add skill</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Verified Skills Roster -->
+      <div class="sb-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="fw-bold mb-0">Your listed skills</h3>
+          <span class="text-caption" th:with="count=${#lists.size(user.skills)}"
+            th:text="${count == 1 ? '1 skill' : count + ' skills'}">
+            0 skills
+          </span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(user.skills)}" class="empty-state py-3">
+          <p class="mb-0">No skills added yet. Add a skill above to get matched to campus teams.</p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(user.skills)}" class="row g-2">
+          <div class="col-md-6" th:each="us : ${user.skills}">
+            <div class="p-3 rounded-3 border d-flex justify-content-between align-items-center bg-white">
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <strong class="small" th:text="${us.skill.name}">Skill Name</strong>
+                  <span class="text-caption" th:text="${us.skill.category}">Technical</span>
+                </div>
+                <div class="text-caption mt-1">
+                  <span th:text="${us.proficiencyLabel}">Level</span> &bull;
+                  <span th:text="${us.proficiency} + ' / 5'">3 / 5</span>
+                </div>
+              </div>
+              <form th:action="@{/profile/skills/{id}/delete(id=${us.id})}" method="post" class="m-0"
+                onsubmit="return confirm('Remove this skill from your profile?');">
+                <button class="btn btn-sb-secondary btn-sm-compact" type="submit" title="Remove skill">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+
+</html>

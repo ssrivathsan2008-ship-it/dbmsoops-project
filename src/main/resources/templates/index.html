@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Home')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('home')}"></nav>
+
+<main>
+  <!-- Hero Section -->
+  <section class="py-5">
+    <div class="container container-wide">
+      <div class="row align-items-center py-4 py-lg-5">
+        <div class="col-lg-7">
+          <div class="d-inline-flex align-items-center gap-2 mb-3">
+            <span class="badge-status">
+              <span class="status-dot dot-approved"></span>
+              <span>Java &amp; DBMS Mini Project</span>
+            </span>
+          </div>
+
+          <h1 class="display-5 fw-bold mb-3" style="line-height: 1.15; letter-spacing: -0.03em;">
+            Find your people. Build what matters.
+          </h1>
+
+          <p class="text-muted fs-5 mb-4" style="max-width: 540px; line-height: 1.55;">
+            A team formation and skill matching platform for student projects, hackathons and research.
+          </p>
+
+          <div class="d-flex flex-wrap align-items-center gap-3">
+            <th:block sec:authorize="!isAuthenticated()">
+              <a th:href="@{/register}" class="btn btn-sb-primary">
+                Get started
+              </a>
+              <a th:href="@{/login}" class="btn btn-sb-tertiary">
+                Sign in to demo &rarr;
+              </a>
+            </th:block>
+            <th:block sec:authorize="isAuthenticated()">
+              <a th:href="@{/dashboard}" class="btn btn-sb-primary">
+                Go to dashboard
+              </a>
+              <a th:href="@{/projects}" class="btn btn-sb-tertiary">
+                Explore projects &rarr;
+              </a>
+            </th:block>
+          </div>
+        </div>
+
+        <div class="col-lg-5 mt-4 mt-lg-0">
+          <div class="sb-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="text-caption">Explainable matching</span>
+              <span class="badge-status">
+                <span class="status-dot dot-approved"></span>
+                <span>Rule-based</span>
+              </span>
+            </div>
+
+            <p class="text-muted small mb-3">
+              SkillBridge matches candidates with open roles through deterministic skill overlap:
+            </p>
+
+            <div class="p-3 mb-3" style="background-color: var(--sb-border-subtle); border-radius: var(--sb-radius-btn);">
+              <code class="text-dark fw-semibold" style="font-size: 0.875rem;">
+                score = matched required skills / total required skills
+              </code>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+              <span class="text-caption">Example: 2 of 3 skills matched</span>
+              <span class="fw-bold" style="color: var(--sb-accent);">67% match</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem and Solution Section -->
+  <section class="py-4">
+    <div class="container container-wide">
+      <div class="row g-4">
+        
+        <!-- The Problem -->
+        <div class="col-md-5">
+          <div class="sb-card h-100">
+            <span class="text-caption text-uppercase">The challenge</span>
+            <h3 class="fw-bold mt-1 mb-3">Why great projects fail to start</h3>
+            <p class="text-muted mb-4">
+              Finding the right collaborators across departments is fragmented, leading to imbalanced skill sets and stalled initiatives.
+            </p>
+            <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
+              <li class="d-flex align-items-start gap-2">
+                <span class="badge-status"><span class="status-dot dot-rejected"></span></span>
+                <span>Skills are hard to discover across campus departments.</span>
+              </li>
+              <li class="d-flex align-items-start gap-2">
+                <span class="badge-status"><span class="status-dot dot-rejected"></span></span>
+                <span>Teams lack balanced roles between engineering and design.</span>
+              </li>
+              <li class="d-flex align-items-start gap-2">
+                <span class="badge-status"><span class="status-dot dot-rejected"></span></span>
+                <span>No transparent application workflow with transactional integrity.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Our Solution -->
+        <div class="col-md-7">
+          <div class="sb-card h-100">
+            <span class="text-caption text-uppercase">Our solution</span>
+            <h3 class="fw-bold mt-1 mb-3">One campus platform for balanced teams</h3>
+            <p class="text-muted mb-4">
+              A single place to showcase verifiable proficiencies, discover relevant projects, and manage team rosters.
+            </p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background-color: var(--sb-border-subtle);">
+                  <div class="fw-bold mb-1">01. Profile</div>
+                  <p class="text-muted small mb-0">List technical and soft skills with 1–5 proficiency ratings.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background-color: var(--sb-border-subtle);">
+                  <div class="fw-bold mb-1">02. Match</div>
+                  <p class="text-muted small mb-0">Rank candidates transparently based on required role requirements.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background-color: var(--sb-border-subtle);">
+                  <div class="fw-bold mb-1">03. Form</div>
+                  <p class="text-muted small mb-0">Approve join requests with single-transaction database integrity.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- System Architecture Section -->
+  <section class="py-5">
+    <div class="container container-wide">
+      <div class="text-center mb-4">
+        <h3 class="fw-bold mb-1">System architecture</h3>
+        <p class="text-muted small">Built with a modern, decoupled full-stack architecture</p>
+      </div>
+
+      <div class="row g-3 text-center">
+        <div class="col-md-3 col-6">
+          <div class="sb-card h-100">
+            <div class="avatar-initials mx-auto mb-2"><i class="bi bi-window"></i></div>
+            <h5 class="fw-semibold mb-1">Presentation</h5>
+            <p class="text-caption mb-0">HTML5, CSS3, Bootstrap 5 &amp; Thymeleaf</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="sb-card h-100">
+            <div class="avatar-initials mx-auto mb-2"><i class="bi bi-gear-wide"></i></div>
+            <h5 class="fw-semibold mb-1">Application</h5>
+            <p class="text-caption mb-0">Java 21+, Spring Boot 3.3, Spring Security</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="sb-card h-100">
+            <div class="avatar-initials mx-auto mb-2"><i class="bi bi-layers"></i></div>
+            <h5 class="fw-semibold mb-1">Persistence</h5>
+            <p class="text-caption mb-0">Spring Data JPA &amp; Hibernate 6 ORM</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="sb-card h-100">
+            <div class="avatar-initials mx-auto mb-2"><i class="bi bi-database"></i></div>
+            <h5 class="fw-semibold mb-1">Database</h5>
+            <p class="text-caption mb-0">MySQL 8 Relational Model &amp; Transactions</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
